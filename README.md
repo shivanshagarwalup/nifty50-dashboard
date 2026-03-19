@@ -1,8 +1,6 @@
 # 📊 Nifty 50 Historical Dashboard
 
-![Status](https://img.shields.io/badge/status-active-success)
 ![Tech](https://img.shields.io/badge/stack-HTML%20%7C%20Tailwind%20%7C%20Python-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
 
 A modern, interactive dashboard to visualize **20 years of Nifty 50 performance** with a clean **Neumorphism (Soft UI)** design.
 
