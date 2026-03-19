@@ -2,6 +2,7 @@
 
 ![Tech](https://img.shields.io/badge/stack-HTML%20%7C%20Tailwind%20%7C%20Python-blue)
 
+
 A modern, interactive dashboard to visualize **20 years of Nifty 50 performance** with a clean **Neumorphism (Soft UI)** design.
 
 ---
@@ -61,14 +62,7 @@ project/
 
 ## ⚙️ Installation & Setup
 
-### 1️⃣ Clone the Repository
 
-```
-git clone https://github.com/your-username/nifty-dashboard.git
-cd nifty-dashboard
-```
-
----
 
 ### 2️⃣ Install Dependencies
 
