@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nifty 50 Dashboard - Neumorphism</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS CDN with Neumorphism Config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'neumo-bg': '#e0e5ec', // Light background for neomorphism
+                        'neumo-text': '#333333',
+                        'neumo-primary': '#6c63ff', // A vibrant accent for text/icons
+                        'neumo-shadow-light': '#ffffff',
+                        'neumo-shadow-dark': '#a3b1c6',
+                    },
+                    boxShadow: {
+                        'neumo-out': '8px 8px 16px var(--tw-shadow-color-dark, #a3b1c6), -8px -8px 16px var(--tw-shadow-color-light, #ffffff)',
+                        'neumo-in': 'inset 5px 5px 10px var(--tw-shadow-color-dark, #a3b1c6), inset -5px -5px 10px var(--tw-shadow-color-light, #ffffff)',
+                        'neumo-btn-active': 'inset 3px 3px 6px var(--tw-shadow-color-dark, #a3b1c6), inset -3px -3px 6px var(--tw-shadow-color-light, #ffffff)',
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                        display: ['Montserrat', 'sans-serif'], // For numbers and titles
+                    },
+                    spacing: { // Define rem units for consistent spacing
+                        '0.5rem': '0.5rem',
+                        '1rem': '1rem',
+                        '1.5rem': '1.5rem',
+                        '2rem': '2rem',
+                        '2.5rem': '2.5rem',
+                        '3rem': '3rem',
+                        '4rem': '4rem',
+                        '5rem': '5rem',
+                        '6rem': '6rem',
+                    }
+                }
+            },
+            plugins: [],
+        }
+    </script>
+
+    <!-- ApexCharts CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <style>
+        /* Custom styles for smoother transitions and base styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--tw-colors-neumo-bg, #e0e5ec);
+            color: var(--tw-colors-neumo-text, #333333);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            margin: 0;
+            padding: 0;
+        }
+
+        #dashboard-container {
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        #dashboard-container.fade-in {
+            opacity: 1;
+        }
+
+        /* Neomorphic base styles for elements */
+        .neumo-element {
+            background-color: var(--tw-colors-neumo-bg, #e0e5ec);
+            border-radius: 1.5rem; /* Gently rounded corners */
+            padding: 1.5rem; /* Generous padding */
+            box-shadow: 8px 8px 16px var(--tw-shadow-color-dark, #a3b1c6), -8px -8px 16px var(--tw-shadow-color-light, #ffffff);
+            transition: all 0.2s ease-in-out;
+        }
+        .neumo-button {
+            @apply neumo-element cursor-pointer font-medium text-neumo-text text-sm md:text-base whitespace-nowrap;
+            padding: 0.75rem 1.5rem;
+            box-shadow: 8px 8px 16px var(--tw-shadow-color-dark, #a3b1c6), -8px -8px 16px var(--tw-shadow-color-light, #ffffff);
+        }
+        .neumo-button:hover {
+            box-shadow: inset 5px 5px 10px var(--tw-shadow-color-dark, #a3b1c6), inset -5px -5px 10px var(--tw-shadow-color-light, #ffffff);
+            transform: translateY(1px); /* Slight press effect */
+        }
+        .neumo-button.active, .neumo-button:active, .neumo-button:focus {
+            box-shadow: inset 3px 3px 6px var(--tw-shadow-color-dark, #a3b1c6), inset -3px -3px 6px var(--tw-shadow-color-light, #ffffff);
+            transform: none; /* Reset transform on active/focus */
+            outline: none; /* Remove default focus outline */
+        }
+
+        .neumo-input {
+            @apply neumo-element appearance-none border-none text-neumo-text;
+            box-shadow: inset 5px 5px 10px var(--tw-shadow-color-dark, #a3b1c6), inset -5px -5px 10px var(--tw-shadow-color-light, #ffffff);
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem; /* Slightly smaller radius for inputs */
+        }
+        .neumo-input:focus {
+            outline: none;
+            box-shadow: inset 3px 3px 6px var(--tw-shadow-color-dark, #a3b1c6), inset -3px -3px 6px var(--tw-shadow-color-light, #ffffff);
+        }
+
+        .neumo-radio-group .neumo-radio-label {
+            @apply relative cursor-pointer block p-1rem text-center; /* Use custom rem value */
+            border-radius: 1rem;
+            box-shadow: 8px 8px 16px var(--tw-shadow-color-dark, #a3b1c6), -8px -8px 16px var(--tw-shadow-color-light, #ffffff);
+            transition: all 0.2s ease-in-out;
+        }
+        .neumo-radio-group input[type="radio"] {
+            @apply absolute opacity-0 w-0 h-0;
+        }
+        .neumo-radio-group input[type="radio"]:checked + .neumo-radio-label {
+            box-shadow: inset 3px 3px 6px var(--tw-shadow-color-dark, #a3b1c6), inset -3px -3px 6px var(--tw-shadow-color-light, #ffffff);
+            color: var(--tw-colors-neumo-primary); /* Accent color for active */
+        }
+        .neumo-radio-group input[type="radio"]:hover + .neumo-radio-label:not(:checked) {
+             box-shadow: inset 5px 5px 10px var(--tw-shadow-color-dark, #a3b1c6), inset -5px -5px 10px var(--tw-shadow-color-light, #ffffff);
+             transform: translateY(1px);
+        }
+        
+        /* Ensure high contrast */
+        .high-contrast-text {
+            color: #1a202c; /* Very dark gray */
+        }
+        .high-contrast-value {
+            color: #2d3748; /* Darker gray for values */
+        }
+        .text-green-600 { color: #2f855a; } /* Tailwind default, ensure it's WCAG compliant */
+        .text-red-600 { color: #e53e3e; } /* Tailwind default, ensure it's WCAG compliant */
+        
+        /* ApexCharts Overrides for Neomorphism */
+        .apexcharts-canvas .apexcharts-tooltip {
+            background: var(--tw-colors-neumo-bg, #e0e5ec) !important;
+            border: none !important;
+            box-shadow: 8px 8px 16px var(--tw-shadow-color-dark, #a3b1c6), -8px -8px 16px var(--tw-shadow-color-light, #ffffff) !important;
+            border-radius: 1.5rem !important;
+            padding: 1rem !important;
+            color: var(--tw-colors-neumo-text, #333333) !important; /* Ensure tooltip text has high contrast */
+        }
+        .apexcharts-tooltip-title {
+            color: var(--tw-colors-neumo-text, #333333) !important;
+            font-weight: 600 !important;
+            font-size: 1rem !important;
+            margin-bottom: 0.5rem !important;
+            border-bottom: 1px solid var(--tw-shadow-color-dark, #a3b1c6) !important;
+            padding-bottom: 0.5rem !important;
+        }
+        .apexcharts-tooltip-series-group {
+            color: var(--tw-colors-neumo-text, #333333) !important;
+            font-size: 0.875rem !important;
+        }
+        .apexcharts-legend-text {
+            color: var(--tw-colors-neumo-text, #333333) !important;
+        }
+        
+        /* Custom Scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--tw-colors-neumo-bg, #e0e5ec);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--tw-colors-neumo-shadow-dark, #a3b1c6);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8e9db9; /* Slightly darker */
+        }
+    </style>
+</head>
+<body class="bg-neumo-bg text-neumo-text font-sans">
+
+    <div id="dashboard-container" class="min-h-screen p-1rem md:p-2rem lg:p-3rem max-w-7xl mx-auto">
+        
+        <header class="mb-2rem text-center">
+            <h1 class="font-display text-3xl md:text-4xl lg:text-5xl font-bold high-contrast-text">Nifty 50 Historical Dashboard</h1>
+            <p class="text-neumo-text text-base md:text-lg mt-0.5rem">Track the performance of India's benchmark index</p>
+        </header>
+
+        <!-- Control Panel -->
+        <section id="controls" class="grid grid-cols-1 md:grid-cols-3 gap-1.5rem mb-2rem">
+
+            <!-- Date Range Selector -->
+            <div class="neumo-element p-1.5rem flex flex-col md:flex-row flex-wrap items-center gap-1rem col-span-1 md:col-span-2">
+                <label for="date-range-select" class="font-semibold text-base high-contrast-text mb-0.5rem md:mb-0 mr-1rem">Date Range:</label>
+                <div class="flex flex-wrap gap-1rem" role="group" aria-label="Date Range Selection">
+                    <button class="neumo-button date-range-btn active" data-range="20Y" aria-pressed="true">All 20 Years</button>
+                    <button class="neumo-button date-range-btn" data-range="10Y" aria-pressed="false">Last 10 Years</button>
+                    <button class="neumo-button date-range-btn" data-range="5Y" aria-pressed="false">Last 5 Years</button>
+                    <button class="neumo-button date-range-btn" data-range="1Y" aria-pressed="false">Last 1 Year</button>
+                </div>
+                <div class="flex items-center gap-1rem mt-1rem md:mt-0 md:ml-auto w-full md:w-auto">
+                    <input type="date" id="start-date" class="neumo-input w-full md:w-auto" aria-label="Start Date">
+                    <span class="text-neumo-text">-</span>
+                    <input type="date" id="end-date" class="neumo-input w-full md:w-auto" aria-label="End Date">
+                </div>
+            </div>
+
+            <!-- Data Granularity & Export -->
+            <div class="neumo-element p-1.5rem flex flex-col items-center justify-between gap-1.5rem col-span-1">
+                <div class="flex flex-col items-center w-full">
+                    <label class="font-semibold text-base high-contrast-text mb-1rem">Data Granularity:</label>
+                    <div class="flex flex-wrap justify-center gap-1rem neumo-radio-group w-full" role="radiogroup" aria-label="Data Granularity Selection">
+                        <input type="radio" id="daily" name="granularity" value="daily" checked aria-checked="true">
+                        <label for="daily" class="neumo-radio-label flex-grow text-center">Daily</label>
+
+                        <input type="radio" id="weekly" name="granularity" value="weekly" aria-checked="false">
+                        <label for="weekly" class="neumo-radio-label flex-grow text-center">Weekly</label>
+
+                        <input type="radio" id="monthly" name="granularity" value="monthly" aria-checked="false">
+                        <label for="monthly" class="neumo-radio-label flex-grow text-center">Monthly</label>
+                    </div>
+                </div>
+                <button id="export-data-btn" class="neumo-button w-full flex items-center justify-center gap-0.5rem">
+                    <i class="fas fa-download"></i> Export Data
+                </button>
+            </div>
+        </section>
+
+        <!-- Main Content: Graph and Metrics -->
+        <section id="main-content" class="grid grid-cols-1 gap-2rem">
+
+            <!-- Main Graph Area -->
+            <div id="chart-container" class="neumo-element p-1.5rem md:p-2rem">
+                <h2 class="font-display text-xl md:text-2xl font-bold high-contrast-text mb-1rem">Nifty 50 Performance</h2>
+                <div id="niftyChart" class="w-full h-96 md:h-[30rem] lg:h-[35rem]"></div>
+            </div>
+
+            <!-- Key Metrics Cards -->
+            <div id="metrics-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-1.5rem">
+                
+                <div class="neumo-element p-1.5rem flex flex-col justify-between text-center min-h-[10rem] h-full">
+                    <p class="font-semibold text-base high-contrast-text mb-0.5rem">Current Value</p>
+                    <p id="metric-current-value" class="font-display text-3xl font-bold high-contrast-value">--</p>
+                    <span class="text-sm text-neumo-text">as of <span id="metric-current-date">--</span></span>
+                </div>
+                
+                <div class="neumo-element p-1.5rem flex flex-col justify-between text-center min-h-[10rem] h-full">
+                    <p class="font-semibold text-base high-contrast-text mb-0.5rem">CAGR (Selected Period)</p>
+                    <p id="metric-cagr" class="font-display text-3xl font-bold high-contrast-value">--</p>
+                    <span class="text-sm text-neumo-text">Annualized Growth Rate</span>
+                </div>
+
+                <div class="neumo-element p-1.5rem flex flex-col justify-between text-center min-h-[10rem] h-full">
+                    <p class="font-semibold text-base high-contrast-text mb-0.5rem">High (Selected Period)</p>
+                    <p id="metric-period-high" class="font-display text-3xl font-bold high-contrast-value">--</p>
+                    <span class="text-sm text-neumo-text">Max over selected period</span>
+                </div>
+
+                <div class="neumo-element p-1.5rem flex flex-col justify-between text-center min-h-[10rem] h-full">
+                    <p class="font-semibold text-base high-contrast-text mb-0.5rem">Low (Selected Period)</p>
+                    <p id="metric-period-low" class="font-display text-3xl font-bold high-contrast-value">--</p>
+                    <span class="text-sm text-neumo-text">Min over selected period</span>
+                </div>
+
+                <div class="neumo-element p-1.5rem flex flex-col justify-between text-center min-h-[10rem] h-full">
+                    <p class="font-semibold text-base high-contrast-text mb-0.5rem">Year-to-Date Change</p>
+                    <p id="metric-ytd-change" class="font-display text-3xl font-bold high-contrast-value">--</p>
+                    <span class="text-sm text-neumo-text">Change from Jan 1st of current year</span>
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+    <script>
+        // Global state
+        let currentGranularity = 'daily';
+        let currentStartDate = new Date();
+        let currentEndDate = new Date();
+        let niftyChart;
+        let allNiftyDailyData = []; // Store all 20 years of daily data
+
+        // Set up initial date ranges (20 years back from today)
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Normalize to start of day
+        
+        const twentyYearsAgo = new Date(today);
+        twentyYearsAgo.setFullYear(today.getFullYear() - 20);
+        twentyYearsAgo.setDate(twentyYearsAgo.getDate() + 1); // Adjust to make it roughly 20 years full
+
+        const tenYearsAgo = new Date(today);
+        tenYearsAgo.setFullYear(today.getFullYear() - 10);
+        tenYearsAgo.setDate(tenYearsAgo.getDate() + 1);
+
+        const fiveYearsAgo = new Date(today);
+        fiveYearsAgo.setFullYear(today.getFullYear() - 5);
+        fiveYearsAgo.setDate(fiveYearsAgo.getDate() + 1);
+
+        const oneYearAgo = new Date(today);
+        oneYearAgo.setFullYear(today.getFullYear() - 1);
+        oneYearAgo.setDate(oneYearAgo.getDate() + 1);
+
+
+        // Helper to format date to YYYY-MM-DD
+        const formatDate = (date) => date.toISOString().split('T')[0];
+
+        // --- Data Fetching ---
+        // (Replaced simulated data function with fetch from JSON in Initial Load)
+
+        function aggregateData(data, granularity) {
+            if (granularity === 'daily') {
+                return data;
+            }
+
+            if (!data || data.length === 0) return [];
+
+            const aggregated = [];
+            let currentPeriodStart = null;
+            let periodValues = [];
+
+            for (let i = 0; i < data.length; i++) {
+                const item = data[i];
+                const itemDate = new Date(item.x);
+
+                if (!currentPeriodStart) {
+                    currentPeriodStart = new Date(itemDate);
+                    // Adjust start date to the beginning of the week/month
+                    if (granularity === 'weekly') {
+                        currentPeriodStart.setDate(itemDate.getDate() - (itemDate.getDay() || 7) + 1); // Go to Monday
+                    } else if (granularity === 'monthly') {
+                        currentPeriodStart.setDate(1); // Go to 1st of month
+                    }
+                    currentPeriodStart.setHours(0, 0, 0, 0);
+                }
+
+                let isSamePeriod = false;
+                if (granularity === 'weekly') {
+                    // Check if itemDate is within the same ISO week as currentPeriodStart
+                    const currentWeek = new Date(currentPeriodStart.getFullYear(), currentPeriodStart.getMonth(), currentPeriodStart.getDate());
+                    currentWeek.setDate(currentWeek.getDate() + 3 - (currentWeek.getDay() + 6) % 7); // Thursday in same week
+                    const currentWeekNum = Math.ceil((((currentWeek - new Date(currentWeek.getFullYear(), 0, 1)) / 86400000) + 1) / 7);
+
+                    const itemWeek = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
+                    itemWeek.setDate(itemWeek.getDate() + 3 - (itemWeek.getDay() + 6) % 7);
+                    const itemWeekNum = Math.ceil((((itemWeek - new Date(itemWeek.getFullYear(), 0, 1)) / 86400000) + 1) / 7);
+
+                    isSamePeriod = currentPeriodStart.getFullYear() === itemDate.getFullYear() && currentWeekNum === itemWeekNum;
+
+                } else if (granularity === 'monthly') {
+                    isSamePeriod = itemDate.getFullYear() === currentPeriodStart.getFullYear() &&
+                                   itemDate.getMonth() === currentPeriodStart.getMonth();
+                }
+
+                if (isSamePeriod) {
+                    periodValues.push(item.y);
+                } else {
+                    // New period started, push previous aggregated data
+                    if (periodValues.length > 0) {
+                        const avgValue = periodValues.reduce((sum, val) => sum + val, 0) / periodValues.length;
+                        aggregated.push({
+                            x: new Date(currentPeriodStart),
+                            y: parseFloat(avgValue.toFixed(2)), // Average for the period
+                        });
+                    }
+
+                    // Reset for new period
+                    currentPeriodStart = new Date(itemDate);
+                    if (granularity === 'weekly') {
+                        currentPeriodStart.setDate(itemDate.getDate() - (itemDate.getDay() || 7) + 1);
+                    } else if (granularity === 'monthly') {
+                        currentPeriodStart.setDate(1);
+                    }
+                    currentPeriodStart.setHours(0, 0, 0, 0);
+                    
+                    periodValues = [item.y];
+                }
+            }
+
+            // Push the last period's data
+            if (periodValues.length > 0) {
+                const avgValue = periodValues.reduce((sum, val) => sum + val, 0) / periodValues.length;
+                aggregated.push({
+                    x: new Date(currentPeriodStart),
+                    y: parseFloat(avgValue.toFixed(2)),
+                });
+            }
+
+            return aggregated;
+        }
+
+
+        // --- Metrics Calculation ---
+        function calculateMetrics(data) {
+            const currentValEl = document.getElementById('metric-current-value');
+            const currentValDateEl = document.getElementById('metric-current-date');
+            const cagrEl = document.getElementById('metric-cagr');
+            const periodHighEl = document.getElementById('metric-period-high');
+            const periodLowEl = document.getElementById('metric-period-low');
+            const ytdChangeEl = document.getElementById('metric-ytd-change');
+
+            // Reset classes
+            [cagrEl, ytdChangeEl].forEach(el => el.classList.remove('text-green-600', 'text-red-600'));
+
+
+            if (!data || data.length === 0) {
+                currentValEl.textContent = '--';
+                currentValDateEl.textContent = '--';
+                cagrEl.textContent = '--';
+                periodHighEl.textContent = '--';
+                periodLowEl.textContent = '--';
+                ytdChangeEl.textContent = '--';
+                return;
+            }
+
+            // Ensure data is sorted by date for accurate calculations
+            data.sort((a, b) => new Date(a.x) - new Date(b.x));
+
+            const firstValue = data[0].y;
+            const lastValue = data[data.length - 1].y;
+            const firstDate = new Date(data[0].x);
+            const lastDate = new Date(data[data.length - 1].x);
+
+            currentValEl.textContent = `₹${lastValue.toLocaleString('en-IN')}`;
+            currentValDateEl.textContent = lastDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+            // CAGR (Compound Annual Growth Rate)
+            const numYears = (lastDate - firstDate) / (1000 * 60 * 60 * 24 * 365.25);
+            if (numYears > 1 / 365.25) { // Only calculate if duration is more than a day
+                const cagr = ((Math.pow((lastValue / firstValue), (1 / numYears)) - 1) * 100).toFixed(2);
+                cagrEl.textContent = `${cagr}%`;
+                cagrEl.classList.toggle('text-red-600', parseFloat(cagr) < 0);
+                cagrEl.classList.toggle('text-green-600', parseFloat(cagr) >= 0);
+            } else {
+                cagrEl.textContent = '--';
+            }
+
+            // High/Low (over selected period)
+            const values = data.map(d => d.y);
+            const high = Math.max(...values);
+            const low = Math.min(...values);
+            periodHighEl.textContent = `₹${high.toLocaleString('en-IN')}`;
+            periodLowEl.textContent = `₹${low.toLocaleString('en-IN')}`;
+
+            // Year-to-Date Change
+            const currentYear = lastDate.getFullYear();
+            const startOfYear = new Date(currentYear, 0, 1);
+            let ytdStartValue = null;
+
+            // Find the closest value on or after startOfYear within the filtered data
+            for (let i = 0; i < data.length; i++) {
+                if (new Date(data[i].x).getFullYear() === currentYear && new Date(data[i].x) >= startOfYear) {
+                    ytdStartValue = data[i].y;
+                    break;
+                }
+            }
+            
+            if (ytdStartValue !== null && ytdStartValue !== 0) { // Avoid division by zero
+                const ytdChange = ((lastValue - ytdStartValue) / ytdStartValue * 100).toFixed(2);
+                ytdChangeEl.textContent = `${ytdChange}%`;
+                ytdChangeEl.classList.toggle('text-red-600', parseFloat(ytdChange) < 0);
+                ytdChangeEl.classList.toggle('text-green-600', parseFloat(ytdChange) >= 0);
+            } else {
+                ytdChangeEl.textContent = '--';
+            }
+        }
+
+
+        // --- Chart Initialization & Update ---
+        function renderChart(data) {
+            const chartOptions = {
+                series: [{
+                    name: 'Nifty 50',
+                    data: data
+                }],
+                chart: {
+                    type: 'area',
+                    height: '100%',
+                    zoom: {
+                        enabled: true,
+                        type: 'x',
+                        autoScaleYaxis: true
+                    },
+                    toolbar: {
+                        show: true,
+                        autoSelected: 'zoom'
+                    },
+                    background: 'transparent',
+                    fontFamily: 'Montserrat, sans-serif',
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    curve: 'smooth',
+                    width: 3,
+                    colors: [tailwind.config.theme.extend.colors['neumo-primary']]
+                },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.7,
+                        opacityTo: 0.9,
+                        stops: [0, 90, 100],
+                        colorStops: [
+                            { offset: 0, color: tailwind.config.theme.extend.colors['neumo-primary'], opacity: 0.6 },
+                            { offset: 100, color: tailwind.config.theme.extend.colors['neumo-primary'], opacity: 0.05 }
+                        ]
+                    }
+                },
+                xaxis: {
+                    type: 'datetime',
+                    labels: {
+                        style: {
+                            colors: [tailwind.config.theme.extend.colors['neumo-text']],
+                        },
+                        datetimeFormatter: {
+                            year: 'yyyy',
+                            month: 'MMM \'yy',
+                            day: 'dd MMM',
+                            hour: 'HH:mm'
+                        }
+                    },
+                    axisBorder: {
+                        show: false
+                    },
+                    axisTicks: {
+                        show: false
+                    }
+                },
+                yaxis: {
+                    labels: {
+                        formatter: function (value) {
+                            return '₹' + value.toLocaleString('en-IN');
+                        },
+                        style: {
+                            colors: [tailwind.config.theme.extend.colors['neumo-text']],
+                        }
+                    },
+                    opposite: false,
+                    tooltip: {
+                        enabled: true
+                    }
+                },
+                grid: {
+                    borderColor: tailwind.config.theme.extend.colors['neumo-shadow-dark'],
+                    strokeDashArray: 4,
+                    xaxis: {
+                        lines: {
+                            show: false
+                        }
+                    },
+                    yaxis: {
+                        lines: {
+                            show: true
+                        }
+                    }
+                },
+                tooltip: {
+                    enabled: true,
+                    x: {
+                        format: 'dd MMM yyyy'
+                    },
+                    y: {
+                        formatter: function (value) {
+                            return `₹${value.toLocaleString('en-IN')}`;
+                        }
+                    },
+                    theme: 'light', // Uses ApexCharts' light theme, which we've neomorphic-styled
+                },
+                noData: {
+                    text: 'No data available for this period',
+                    align: 'center',
+                    verticalAlign: 'middle',
+                    offsetX: 0,
+                    offsetY: 0,
+                    style: {
+                        color: tailwind.config.theme.extend.colors['neumo-text'],
+                        fontSize: '16px',
+                        fontFamily: 'Poppins, sans-serif'
+                    }
+                }
+            };
+
+            if (niftyChart) {
+                niftyChart.updateOptions(chartOptions); // Update existing chart options
+                niftyChart.updateSeries([{ data: data }]); // Update data
+            } else {
+                niftyChart = new ApexCharts(document.querySelector("#niftyChart"), chartOptions);
+                niftyChart.render();
+            }
+        }
+
+        // --- Event Handlers ---
+        function updateDashboard() {
+            const filteredData = allNiftyDailyData.filter(item => {
+                const itemDate = new Date(item.x);
+                return itemDate >= currentStartDate && itemDate <= currentEndDate;
+            });
+            
+            const processedData = aggregateData(filteredData, currentGranularity);
+            renderChart(processedData);
+            calculateMetrics(processedData);
+        }
+
+        document.querySelectorAll('.date-range-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                document.querySelectorAll('.date-range-btn').forEach(btn => {
+                    btn.classList.remove('active', 'neumo-btn-active');
+                    btn.setAttribute('aria-pressed', 'false');
+                });
+                this.classList.add('active', 'neumo-btn-active');
+                this.setAttribute('aria-pressed', 'true');
+                
+                const range = this.dataset.range;
+                if (range === '20Y') {
+                    currentStartDate = twentyYearsAgo;
+                } else if (range === '10Y') {
+                    currentStartDate = tenYearsAgo;
+                } else if (range === '5Y') {
+                    currentStartDate = fiveYearsAgo;
+                } else if (range === '1Y') {
+                    currentStartDate = oneYearAgo;
+                }
+                currentEndDate = today;
+
+                document.getElementById('start-date').value = formatDate(currentStartDate);
+                document.getElementById('end-date').value = formatDate(currentEndDate);
+                updateDashboard();
+            });
+        });
+
+        document.querySelectorAll('input[name="granularity"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                currentGranularity = this.value;
+                document.querySelectorAll('input[name="granularity"]').forEach(r => r.setAttribute('aria-checked', 'false'));
+                this.setAttribute('aria-checked', 'true');
+                updateDashboard();
+            });
+        });
+
+        document.getElementById('start-date').addEventListener('change', function() {
+            currentStartDate = new Date(this.value);
+            // Remove active state from preset buttons
+            document.querySelectorAll('.date-range-btn').forEach(btn => {
+                btn.classList.remove('active', 'neumo-btn-active');
+                btn.setAttribute('aria-pressed', 'false');
+            });
+            updateDashboard();
+        });
+
+        document.getElementById('end-date').addEventListener('change', function() {
+            currentEndDate = new Date(this.value);
+            // Remove active state from preset buttons
+            document.querySelectorAll('.date-range-btn').forEach(btn => {
+                btn.classList.remove('active', 'neumo-btn-active');
+                btn.setAttribute('aria-pressed', 'false');
+            });
+            updateDashboard();
+        });
+
+        document.getElementById('export-data-btn').addEventListener('click', function() {
+            const dataToExport = aggregateData(allNiftyDailyData.filter(item => {
+                const itemDate = new Date(item.x);
+                return itemDate >= currentStartDate && itemDate <= currentEndDate;
+            }), currentGranularity);
+
+            let csvContent = "data:text/csv;charset=utf-8,Date,Nifty Value\n";
+            dataToExport.forEach(row => {
+                const date = new Date(row.x).toLocaleDateString('en-CA'); // YYYY-MM-DD for CSV
+                csvContent += `${date},${row.y}\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `nifty_data_${formatDate(currentStartDate)}_to_${formatDate(currentEndDate)}_${currentGranularity}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // --- Initial Load ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Set initial date pickers to reflect "All 20 Years"
+            document.getElementById('start-date').value = formatDate(twentyYearsAgo);
+            document.getElementById('end-date').value = formatDate(today);
+
+            currentStartDate = twentyYearsAgo;
+            currentEndDate = today;
+
+            try {
+                // Fetch full 20 years of real daily data
+                const response = await fetch('nifty50_data.json');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                allNiftyDailyData = await response.json();
+            } catch (error) {
+                console.error("Error loading Nifty 50 data:", error);
+                document.getElementById('chart-container').innerHTML = '<p style="color:red; text-align:center; padding: 2rem;">Error loading historical data. Please fetch the actual data first using fetch_data.py over a local server!</p>';
+            }
+            
+            // Initial dashboard render
+            updateDashboard();
+
+            // Fade in dashboard
+            document.getElementById('dashboard-container').classList.add('fade-in');
+        });
+    </script>
+</body>
+</html>
