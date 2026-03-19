@@ -30,11 +30,6 @@ A modern, interactive dashboard to visualize **20 years of Nifty 50 performance*
 
 ---
 
-## 🖼️ Preview
-
-*Add screenshots here (recommended for GitHub visibility)*
-
----
 
 ## 🏗️ Tech Stack
 
